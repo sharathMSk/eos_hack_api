@@ -19,6 +19,23 @@ public:
 	void createuser(
 		account_name username,
 		uint64_t ssn,
+		string email,
+		string public_key
+	) {
+		require_auth(_self);
+		// Let's make sure the primary key doesn't exist
+		eosio_assert(_users.find(ssn) == _users.end(), "This SSN already exists in the User list");
+		_users.emplace(get_self(), [&](auto& p) {
+			p.ssn = ssn;
+			p.public_key = public_key;
+			p.email = email;
+			p.username = username;
+		});
+	}
+
+	/// @abi action
+	void updateuser(
+		uint64_t ssn,
 		string first_name,
 		string middle_name,
 		string last_name,
@@ -26,22 +43,27 @@ public:
 		string email,
 		string address,
 		string account_number,
-		uint64_t credit_score
+		uint64_t credit_score,
+		string city,
+		string country,
+		string company
 	) {
-		require_auth(_self);
+		//require_auth(_self);
 		// Let's make sure the primary key doesn't exist
-		eosio_assert(_users.find(ssn) == _users.end(), "This SSN already exists in the User list");
-		_users.emplace(get_self(), [&](auto& p) {
-			p.ssn = ssn;
-			p.first_name = first_name;
-			p.middle_name = middle_name;
-			p.last_name = last_name;
-			p.phone = phone;
-			p.email = email;
-			p.address = address;
-			p.account_number = account_number;
-			p.credit_score = credit_score;
-			p.issuer = username;
+		//eosio_assert(_users.find(ssn) == _users.end(), "This SSN already exists in the User list");
+		auto itr = _users.find(ssn);
+		_users.modify(itr, 0, [&](auto& user) {
+			user.first_name = first_name;
+			user.middle_name = middle_name;
+			user.last_name = last_name;
+			user.phone = phone;
+			user.email = email;
+			user.address = address;
+			user.account_number = account_number;
+			user.credit_score = credit_score;
+			user.city = city;
+			user.country = country;
+			user.company = company;
 		});
 	}
 
@@ -107,7 +129,7 @@ public:
 private:
 	/// @abi struct
 	struct userdetails {
-		uint64_t ssn; // primary key, social security number
+		uint64_t ssn;
 		string first_name;
 		string middle_name;
 		string last_name;
@@ -116,15 +138,20 @@ private:
 		string address;
 		string account_number;
 		uint64_t credit_score;
-		account_name issuer;
+		string city;
+		string country;
+		string company;
+		account_name username;
+		uint64_t reputation_points;
+		string public_key; // primary key
 
 		uint64_t primary_key()const { return ssn; }
-		uint64_t by_credit_score()const { return credit_score; }
+		uint64_t by_ssn()const { return ssn; }
 	};
 
 	/// @abi table
 	typedef eosio::multi_index< N(users), userdetails,
-		indexed_by<N(bycreditscore), const_mem_fun<userdetails, uint64_t, &userdetails::by_credit_score>>
+		indexed_by<N(byssn), const_mem_fun<userdetails, uint64_t, &userdetails::by_ssn>>
 	>  users;
 	users _users;
 
@@ -167,4 +194,4 @@ private:
 	endorsements _endorsements;
 };
 
-EOSIO_ABI(loanblock, (createuser)(createreq)(getmatch)(createendorse))
+EOSIO_ABI(loanblock, (createuser)(updateuser)(createreq)(getmatch)(createendorse))
