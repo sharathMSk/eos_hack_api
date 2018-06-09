@@ -27,7 +27,7 @@ public:
 		string account_number,
 		uint64_t credit_score
 	) {
-		require_auth(username);
+		require_auth(_self);
 		// Let's make sure the primary key doesn't exist
 		eosio_assert(_users.find(ssn) == _users.end(), "This SSN already exists in the addressbook");
 		_users.emplace(get_self(), [&](auto& p) {
@@ -40,6 +40,7 @@ public:
 			p.address = address;
 			p.account_number = account_number;
 			p.credit_score = credit_score;
+			p.issuer = username;
 		});
 	}
 
@@ -60,6 +61,7 @@ private:
 		string address;
 		string account_number;
 		uint64_t credit_score;
+		account_name issuer;
 
 		uint64_t primary_key()const { return ssn; }
 		uint64_t by_credit_score()const { return credit_score; }
