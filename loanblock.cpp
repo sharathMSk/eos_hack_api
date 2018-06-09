@@ -87,6 +87,23 @@ public:
 		}
 	}
 
+	/// @abi action
+	void createendorse(
+		uint64_t ssn_from,
+		uint64_t ssn_to,
+		uint64_t endorse_score
+	) {
+		require_auth(_self);
+		// Let's make sure the primary key doesn't exist
+		//eosio_assert(_endorsements.find(ssn) == _endorsements.end(), "This SSN already exists in the Request table");
+		eosio_assert(ssn_from != ssn_to, "Can't endorse self");
+		_endorsements.emplace(get_self(), [&](auto& p) {
+			p.ssn_from = ssn_from;
+			p.ssn_to = ssn_to;
+			p.endorse_score = endorse_score;
+		});
+	}
+
 private:
 	/// @abi struct
 	struct userdetails {
@@ -139,6 +156,7 @@ private:
 		uint64_t ssn_to;
 		uint64_t endorse_score;
 
+		uint64_t primary_key()const { return ssn_from; }
 		uint64_t by_ssn_from() const { return ssn_from; }
 	};
 
@@ -149,4 +167,4 @@ private:
 	endorsements _endorsements;
 };
 
-EOSIO_ABI(loanblock, (createuser)(createreq)(getmatch))
+EOSIO_ABI(loanblock, (createuser)(createreq)(getmatch)(createendorse))
