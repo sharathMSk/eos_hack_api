@@ -127,7 +127,7 @@ public:
 	}
 
 private:
-	/// @abi struct
+	/// @abi table users
 	struct userdetails {
 		uint64_t ssn;
 		string first_name;
@@ -156,7 +156,7 @@ private:
 	>  users;
 	users _users;
 
-	/// @abi struct
+	/// @abi table requests
 	struct request {
 		uint64_t ssn;
 		uint64_t request_date;
@@ -178,7 +178,7 @@ private:
 	> requests;
 	requests _requests;
 
-	/// @abi struct
+	/// @abi table endorsements
 	struct endorse {
 		uint64_t ssn_from;
 		uint64_t ssn_to;
