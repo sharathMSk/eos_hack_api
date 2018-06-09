@@ -1,6 +1,7 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/print.hpp>
 #include <string>
+#include <vector>
 
 using namespace std;
 using namespace eosio;
@@ -29,7 +30,7 @@ public:
 	) {
 		require_auth(_self);
 		// Let's make sure the primary key doesn't exist
-		eosio_assert(_users.find(ssn) == _users.end(), "This SSN already exists in the addressbook");
+		eosio_assert(_users.find(ssn) == _users.end(), "This SSN already exists in the User list");
 		_users.emplace(get_self(), [&](auto& p) {
 			p.ssn = ssn;
 			p.first_name = first_name;
@@ -45,8 +46,45 @@ public:
 	}
 
 	/// @abi action
-	void temp() {
+	void createreq(
+		uint64_t ssn,
+		uint64_t request_date,
+		string request_type,
+		uint64_t amount,
+		uint64_t interest_rate,
+		uint64_t duration
+	) {
+		require_auth(_self);
+		// Let's make sure the primary key doesn't exist
+		eosio_assert(_requests.find(ssn) == _requests.end(), "This SSN already exists in the Request table");
+		_requests.emplace(get_self(), [&](auto& p) {
+			p.ssn = ssn;
+			p.request_date = request_date;
+			p.request_type = request_type;
+			p.amount = amount;
+			p.interest_rate = interest_rate;
+			p.duration = duration;
+			p.status = 0;
+		});
+	}
 
+	/// @abi action
+	void getmatch(uint64_t ssn, string request_type) {
+		auto rate = _requests.get(ssn);
+		auto interest_index = _requests.template get_index<N(byinterestrates)>();
+		auto itr = interest_index.lower_bound(rate.interest_rate - 1);
+		vector<pair<uint64_t, uint64_t>> interest_pair;
+		while (itr != interest_index.end()) {
+			if (
+				(itr->request_type != request_type) &&
+				(itr->interest_rate < rate.interest_rate + 1) &&
+				(itr->amount == rate.amount)
+				) {
+
+				interest_pair.push_back(make_pair(itr->ssn, itr->interest_rate));
+			}
+			itr++;
+		}
 	}
 
 private:
@@ -78,11 +116,12 @@ private:
 		uint64_t ssn;
 		uint64_t request_date;
 		string request_type;
-		double amount;
-		int status;
+		uint64_t amount;
+		uint64_t status;
 		uint64_t interest_rate;
-		int duration;
+		uint64_t duration;
 
+		uint64_t primary_key()const { return ssn; }
 		uint64_t by_ssn() const { return ssn; }
 		uint64_t by_interest_rate() const { return interest_rate; }
 	};
@@ -98,7 +137,7 @@ private:
 	struct endorse {
 		uint64_t ssn_from;
 		uint64_t ssn_to;
-		int endorse_score;
+		uint64_t endorse_score;
 
 		uint64_t by_ssn_from() const { return ssn_from; }
 	};
@@ -110,4 +149,4 @@ private:
 	endorsements _endorsements;
 };
 
-EOSIO_ABI(loanblock, (createuser)(temp))
+EOSIO_ABI(loanblock, (createuser)(createreq)(getmatch))
