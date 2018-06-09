@@ -46,7 +46,8 @@ public:
 		uint64_t credit_score,
 		string city,
 		string country,
-		string company
+		string company,
+		uint64_t salary
 	) {
 		//require_auth(_self);
 		// Let's make sure the primary key doesn't exist
@@ -64,6 +65,7 @@ public:
 			user.city = city;
 			user.country = country;
 			user.company = company;
+			user.salary = salary;
 		});
 	}
 
@@ -144,6 +146,7 @@ private:
 		account_name username;
 		uint64_t reputation_points;
 		string public_key; // primary key
+		uint64_t salary;
 
 		uint64_t primary_key()const { return ssn; }
 		uint64_t by_ssn()const { return ssn; }
