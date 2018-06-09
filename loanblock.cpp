@@ -40,7 +40,6 @@ public:
 		string middle_name,
 		string last_name,
 		string phone,
-		string email,
 		string address,
 		string account_number,
 		uint64_t credit_score,
@@ -58,7 +57,6 @@ public:
 			user.middle_name = middle_name;
 			user.last_name = last_name;
 			user.phone = phone;
-			user.email = email;
 			user.address = address;
 			user.account_number = account_number;
 			user.credit_score = credit_score;
