@@ -96,13 +96,13 @@ public:
 
 	/// @abi action
 	void createendorse(
-		string ssnfrom,
-		string ssnto,
-		string endorsescore
+		uint32_t ssnfrom,
+		uint32_t ssnto,
+		uint32_t endorsescore
 	) {
-		uint64_t ssn_from = uint64_t(atol(ssnfrom.c_str()));
-		uint64_t ssn_to = uint64_t(atol(ssnto.c_str()));
-		uint64_t endorse_score = uint64_t(atol(endorsescore.c_str()));
+		uint64_t ssn_from = uint64_t(ssnfrom);
+		uint64_t ssn_to = uint64_t(ssnto);
+		uint64_t endorse_score = uint64_t(endorsescore);
 		require_auth(_self);
 		// Let's make sure the primary key doesn't exist
 		//eosio_assert(_endorsements.find(ssn) == _endorsements.end(), "This SSN already exists in the Request table");
@@ -117,7 +117,7 @@ public:
 
 private:
 	/// @abi table
-	struct userdet {
+	struct userdetail {
 		uint64_t ssn;
 		string firstname;
 		string middlename;
@@ -137,9 +137,9 @@ private:
 		uint64_t salary;
 
 		uint64_t primary_key()const { return ssn; }
-		EOSLIB_SERIALIZE(userdet, (ssn)(firstname)(middlename)(lastname)(phone)(email)(address)(accountnumber)(creditscore)(creditlimit)(city)(country)(company)(username)(reputationpoints)(publickey)(salary));
+		EOSLIB_SERIALIZE(userdetail, (ssn)(firstname)(middlename)(lastname)(phone)(email)(address)(accountnumber)(creditscore)(creditlimit)(city)(country)(company)(username)(reputationpoints)(publickey)(salary));
 	};
-	multi_index<N(userdet), userdet> _users;
+	multi_index<N(userdetail), userdetail> _users;
 
 	/// @abi table
 	struct request {
