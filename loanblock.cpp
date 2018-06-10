@@ -153,15 +153,15 @@ private:
 
 
 	/// @abi table
-	struct endorsements {
+	struct endorsement {
 		uint64_t ssnfrom;
 		uint64_t ssnto;
 		uint64_t endorsescore;
 
 		uint64_t primary_key()const { return ssnfrom; }
-		EOSLIB_SERIALIZE(endorsements, (ssnfrom)(ssnto)(endorsescore));
+		EOSLIB_SERIALIZE(endorsement, (ssnfrom)(ssnto)(endorsescore));
 	};
-	multi_index<N(endorsements), endorsements> _endorsements;
+	multi_index<N(endorsement), endorsement> _endorsements;
 
 };
 
