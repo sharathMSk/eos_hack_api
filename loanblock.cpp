@@ -72,6 +72,20 @@ public:
 	}
 
 	/// @abi action
+	void updaterep(
+		uint64_t ssn,
+		uint64_t reputation_points
+	) {
+		//require_auth(_self);
+		// Let's make sure the primary key doesn't exist
+		//eosio_assert(_users.find(ssn) == _users.end(), "This SSN already exists in the User list");
+		auto itr = _users.find(ssn);
+		_users.modify(itr, 0, [&](auto& user) {
+			user.reputationpoints = reputation_points;
+		});
+	}
+
+	/// @abi action
 	void createreq(
 		uint64_t ssn,
 		uint64_t request_date,
@@ -96,13 +110,13 @@ public:
 
 	/// @abi action
 	void createendorse(
-		uint32_t ssnfrom,
-		uint32_t ssnto,
-		uint32_t endorsescore
+		string ssnfrom,
+		string ssnto,
+		string endorsescore
 	) {
-		uint64_t ssn_from = uint64_t(ssnfrom);
-		uint64_t ssn_to = uint64_t(ssnto);
-		uint64_t endorse_score = uint64_t(endorsescore);
+		uint64_t ssn_from = uint64_t(atoi(ssnfrom.c_str()));
+		uint64_t ssn_to = uint64_t(atoi(ssnto.c_str()));
+		uint64_t endorse_score = uint64_t(atoi(endorsescore.c_str()));
 		require_auth(_self);
 		// Let's make sure the primary key doesn't exist
 		//eosio_assert(_endorsements.find(ssn) == _endorsements.end(), "This SSN already exists in the Request table");
@@ -171,5 +185,5 @@ private:
 
 };
 
-EOSIO_ABI(loanblock, (createuser)(updateuser)(createreq)(createendorse))
+EOSIO_ABI(loanblock, (createuser)(updateuser)(createreq)(createendorse)(updaterep))
 
