@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <time.h>
+#include <stdlib.h> 
 
 using namespace std;
 using namespace eosio;
@@ -95,24 +96,28 @@ public:
 
 	/// @abi action
 	void createendorse(
-		uint64_t ssnfrom,
-		uint64_t ssnto,
-		uint64_t endorsescore
+		string ssnfrom,
+		string ssnto,
+		string endorsescore
 	) {
+		uint64_t ssn_from = uint64_t(atol(ssnfrom.c_str()));
+		uint64_t ssn_to = uint64_t(atol(ssnto.c_str()));
+		uint64_t endorse_score = uint64_t(atol(endorsescore.c_str()));
 		require_auth(_self);
 		// Let's make sure the primary key doesn't exist
 		//eosio_assert(_endorsements.find(ssn) == _endorsements.end(), "This SSN already exists in the Request table");
-		eosio_assert(ssnfrom != ssnto, "Can't endorse self");
+		eosio_assert(ssn_from != ssn_to, "Can't endorse self");
 		_endorsements.emplace(get_self(), [&](auto& p) {
-			p.ssnfrom = ssnfrom;
-			p.ssnto = ssnto;
-			p.endorsescore = endorsescore;
+			p.ssnfrom = ssn_from;
+			p.ssnto = ssn_to;
+			p.endorsescore = endorse_score;
+			p.dummy = "";
 		});
 	}
 
 private:
 	/// @abi table
-	struct userdetails {
+	struct userdet {
 		uint64_t ssn;
 		string firstname;
 		string middlename;
@@ -132,9 +137,9 @@ private:
 		uint64_t salary;
 
 		uint64_t primary_key()const { return ssn; }
-		EOSLIB_SERIALIZE(userdetails, (ssn)(firstname)(middlename)(lastname)(phone)(email)(address)(accountnumber)(creditscore)(creditlimit)(city)(country)(company)(username)(reputationpoints)(publickey)(salary));
+		EOSLIB_SERIALIZE(userdet, (ssn)(firstname)(middlename)(lastname)(phone)(email)(address)(accountnumber)(creditscore)(creditlimit)(city)(country)(company)(username)(reputationpoints)(publickey)(salary));
 	};
-	multi_index<N(userdetails), userdetails> _users;
+	multi_index<N(userdet), userdet> _users;
 
 	/// @abi table
 	struct request {
@@ -156,10 +161,11 @@ private:
 	struct endorsement {
 		uint64_t ssnfrom;
 		uint64_t ssnto;
+		string dummy;
 		uint64_t endorsescore;
 
 		uint64_t primary_key()const { return ssnfrom; }
-		EOSLIB_SERIALIZE(endorsement, (ssnfrom)(ssnto)(endorsescore));
+		EOSLIB_SERIALIZE(endorsement, (ssnfrom)(ssnto)(dummy)(endorsescore));
 	};
 	multi_index<N(endorsement), endorsement> _endorsements;
 
